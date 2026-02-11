@@ -86,7 +86,7 @@ packaging==25.0
     #   streamlit
 pandas==2.3.3
     # via streamlit
-pillow==12.0.0
+pillow==12.1.1
     # via streamlit
 protobuf==6.33.0
     # via streamlit
@@ -164,12 +164,9 @@ typer==0.20.0
 typing-extensions==4.15.0
     # via
     #   agno
-    #   altair
-    #   anyio
     #   google-genai
     #   pydantic
     #   pydantic-core
-    #   referencing
     #   streamlit
     #   typer
     #   typing-inspection
@@ -181,5 +178,7 @@ tzdata==2025.2
     # via pandas
 urllib3==2.5.0
     # via requests
+watchdog==6.0.0
+    # via streamlit
 websockets==15.0.1
     # via google-genai
