@@ -48,7 +48,7 @@ pydantic-core==2.27.2
     # via pydantic
 pydantic-settings==2.7.1
     # via agno (libs/agno/pyproject.toml)
-pygments==2.18.0
+pygments==2.20.0
     # via rich
 python-dotenv==1.0.1
     # via
