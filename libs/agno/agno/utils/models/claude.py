@@ -2,7 +2,6 @@ import json
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
-from agno.exceptions import ModelProviderError
 from agno.media import File, Image
 from agno.models.message import Message
 from agno.utils.log import log_error, log_warning
@@ -71,22 +70,42 @@ def supports_assistant_prefill(model_id: str) -> bool:
 
 
 def validate_no_assistant_prefill(model_id: str, messages: List[Dict[str, Any]]) -> None:
-    """Fail loudly for Claude models that require terminal user message."""
+    """Repair messages in-place for Claude models that require a terminal user turn.
+
+    Claude 4.6+ rejects requests whose last message has role=assistant. The agent/team
+    setup paths (build_continuation_user_message + ensure_terminal_user_message) catch
+    the common cases, but inner model-loop and streaming corner cases (e.g. adaptive
+    thinking emitting a thinking-only assistant turn that no follow-up tool/user message
+    consumes) can still leave a trailing assistant turn here. Append an Anthropic-
+    recommended continuation user turn instead of raising, so requests proceed instead
+    of burning retries on a 400.
+    """
     if supports_assistant_prefill(model_id):
         return
-    if messages and messages[-1].get("role") == "assistant":
-        raise ModelProviderError(
-            message=(
-                f"Model '{model_id}' does not support assistant message prefills. "
-                "Conversation must end with user message. "
-                "For continuations, append explicit user message like "
-                "'Your previous response was interrupted and ended with \"...\". "
-                "Continue from where you left off.' "
-                "For handoffs, synthesize fresh user task upstream."
-            ),
-            status_code=400,
-            model_id=model_id,
-        )
+    if not messages or messages[-1].get("role") != "assistant":
+        return
+
+    last = messages[-1]
+    last_text = ""
+    last_content = last.get("content")
+    if isinstance(last_content, str):
+        last_text = last_content
+    elif isinstance(last_content, list):
+        for block in last_content:
+            if isinstance(block, dict) and block.get("type") == "text":
+                text_val = block.get("text")
+                if isinstance(text_val, str):
+                    last_text = text_val
+                    break
+
+    snippet = last_text.strip()[:240] if last_text else ""
+    continuation = (
+        f'Your previous response was interrupted and ended with "{snippet}". '
+        "Continue from where you left off."
+        if snippet
+        else "Continue from where you left off."
+    )
+    messages.append({"role": "user", "content": continuation})
 
 
 
