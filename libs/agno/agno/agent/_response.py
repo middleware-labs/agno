@@ -598,7 +598,11 @@ async def aparse_response_with_parser_model_stream(
 
 
 def generate_response_with_output_model(
-    agent: Agent, model_response: ModelResponse, run_messages: RunMessages, run_response: Optional[RunOutput] = None
+    agent: Agent,
+    model_response: ModelResponse,
+    run_messages: RunMessages,
+    run_response: Optional[RunOutput] = None,
+    run_context: Optional[RunContext] = None,
 ) -> None:
     """Parse the model response using the output model."""
     from agno.agent._messages import get_messages_for_output_model
@@ -607,7 +611,10 @@ def generate_response_with_output_model(
         return
 
     messages_for_output_model = get_messages_for_output_model(agent, run_messages.messages)
-    output_model_response: ModelResponse = agent.output_model.response(messages=messages_for_output_model)
+    response_format = get_response_format(agent, model=agent.output_model, run_context=run_context)
+    output_model_response: ModelResponse = agent.output_model.response(
+        messages=messages_for_output_model, response_format=response_format
+    )
 
     # Accumulate output model metrics
     if run_response is not None:
@@ -621,6 +628,7 @@ def generate_response_with_output_model(
         )
 
     model_response.content = output_model_response.content
+    model_response.parsed = output_model_response.parsed
 
 
 def generate_response_with_output_model_stream(
@@ -628,6 +636,7 @@ def generate_response_with_output_model_stream(
     session: AgentSession,
     run_response: RunOutput,
     run_messages: RunMessages,
+    run_context: Optional[RunContext] = None,
     stream_events: bool = False,
 ) -> Iterator[RunOutputEvent]:
     """Parse the model response using the output model."""
@@ -651,9 +660,10 @@ def generate_response_with_output_model_stream(
     messages_for_output_model = get_messages_for_output_model(agent, run_messages.messages)
 
     model_response = ModelResponse(content="")
+    response_format = get_response_format(agent, model=agent.output_model, run_context=run_context)
 
     for model_response_event in agent.output_model.response_stream(
-        messages=messages_for_output_model, run_response=run_response
+        messages=messages_for_output_model, run_response=run_response, response_format=response_format
     ):
         yield from handle_model_response_chunk(
             agent,
@@ -679,7 +689,11 @@ def generate_response_with_output_model_stream(
 
 
 async def agenerate_response_with_output_model(
-    agent: Agent, model_response: ModelResponse, run_messages: RunMessages, run_response: Optional[RunOutput] = None
+    agent: Agent,
+    model_response: ModelResponse,
+    run_messages: RunMessages,
+    run_response: Optional[RunOutput] = None,
+    run_context: Optional[RunContext] = None,
 ) -> None:
     """Parse the model response using the output model."""
     from agno.agent._messages import get_messages_for_output_model
@@ -688,7 +702,10 @@ async def agenerate_response_with_output_model(
         return
 
     messages_for_output_model = get_messages_for_output_model(agent, run_messages.messages)
-    output_model_response: ModelResponse = await agent.output_model.aresponse(messages=messages_for_output_model)
+    response_format = get_response_format(agent, model=agent.output_model, run_context=run_context)
+    output_model_response: ModelResponse = await agent.output_model.aresponse(
+        messages=messages_for_output_model, response_format=response_format
+    )
 
     # Accumulate output model metrics
     if run_response is not None:
@@ -702,6 +719,7 @@ async def agenerate_response_with_output_model(
         )
 
     model_response.content = output_model_response.content
+    model_response.parsed = output_model_response.parsed
 
 
 async def agenerate_response_with_output_model_stream(
@@ -709,6 +727,7 @@ async def agenerate_response_with_output_model_stream(
     session: AgentSession,
     run_response: RunOutput,
     run_messages: RunMessages,
+    run_context: Optional[RunContext] = None,
     stream_events: bool = False,
 ) -> AsyncIterator[RunOutputEvent]:
     """Parse the model response using the output model."""
@@ -732,9 +751,10 @@ async def agenerate_response_with_output_model_stream(
     messages_for_output_model = get_messages_for_output_model(agent, run_messages.messages)
 
     model_response = ModelResponse(content="")
+    response_format = get_response_format(agent, model=agent.output_model, run_context=run_context)
 
     model_response_stream = agent.output_model.aresponse_stream(
-        messages=messages_for_output_model, run_response=run_response
+        messages=messages_for_output_model, run_response=run_response, response_format=response_format
     )
 
     async for model_response_event in model_response_stream:
@@ -875,6 +895,9 @@ def model_should_return_structured_output(agent: Agent, run_context: Optional[Ru
 def get_response_format(
     agent: Agent, model: Optional[Model] = None, run_context: Optional[RunContext] = None
 ) -> Optional[Union[Dict, Type[BaseModel]]]:
+    if model is None and agent.output_model is not None:
+        return None
+
     # Get output_schema from run_context
     output_schema = run_context.output_schema if run_context else None
 
@@ -1056,7 +1079,12 @@ def handle_model_response_stream(
 
     # Get output_schema from run_context
     output_schema = run_context.output_schema if run_context else None
-    should_parse_structured_output = output_schema is not None and agent.parse_response and agent.parser_model is None
+    should_parse_structured_output = (
+        output_schema is not None
+        and agent.output_model is None
+        and agent.parse_response
+        and agent.parser_model is None
+    )
 
     stream_model_response = True
     if should_parse_structured_output:
@@ -1207,7 +1235,12 @@ async def ahandle_model_response_stream(
 
     # Get output_schema from run_context
     output_schema = run_context.output_schema if run_context else None
-    should_parse_structured_output = output_schema is not None and agent.parse_response and agent.parser_model is None
+    should_parse_structured_output = (
+        output_schema is not None
+        and agent.output_model is None
+        and agent.parse_response
+        and agent.parser_model is None
+    )
 
     stream_model_response = True
     if should_parse_structured_output:
