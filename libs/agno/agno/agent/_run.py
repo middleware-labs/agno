@@ -524,7 +524,9 @@ def _run(
                 raise_if_cancelled(run_response.run_id)  # type: ignore
 
                 # If an output model is provided, generate output using the output model
-                generate_response_with_output_model(agent, model_response, run_messages, run_response=run_response)
+                generate_response_with_output_model(
+                    agent, model_response, run_messages, run_response=run_response, run_context=run_context
+                )
 
                 # If a parser model is provided, structure the response separately
                 parse_response_with_parser_model(
@@ -955,6 +957,7 @@ def _run_stream(
                         session=agent_session,
                         run_response=run_response,
                         run_messages=run_messages,
+                        run_context=run_context,
                         stream_events=stream_events,
                     ):
                         raise_if_cancelled(run_response.run_id)  # type: ignore
@@ -1609,7 +1612,11 @@ async def _arun(
 
                 # If an output model is provided, generate output using the output model
                 await agenerate_response_with_output_model(
-                    agent, model_response=model_response, run_messages=run_messages, run_response=run_response
+                    agent,
+                    model_response=model_response,
+                    run_messages=run_messages,
+                    run_response=run_response,
+                    run_context=run_context,
                 )
 
                 # If a parser model is provided, structure the response separately
@@ -2291,6 +2298,7 @@ async def _arun_stream(
                         session=agent_session,
                         run_response=run_response,
                         run_messages=run_messages,
+                        run_context=run_context,
                         stream_events=stream_events,
                     ):
                         await araise_if_cancelled(run_response.run_id)  # type: ignore
@@ -3129,7 +3137,9 @@ def _continue_run(
                 raise_if_cancelled(run_response.run_id)  # type: ignore
 
                 # If an output model is provided, generate output using the output model
-                generate_response_with_output_model(agent, model_response, run_messages, run_response=run_response)
+                generate_response_with_output_model(
+                    agent, model_response, run_messages, run_response=run_response, run_context=run_context
+                )
 
                 # If a parser model is provided, structure the response separately
                 parse_response_with_parser_model(
@@ -4062,7 +4072,11 @@ async def _acontinue_run(
 
                 # If an output model is provided, generate output using the output model
                 await agenerate_response_with_output_model(
-                    agent, model_response=model_response, run_messages=run_messages, run_response=run_response
+                    agent,
+                    model_response=model_response,
+                    run_messages=run_messages,
+                    run_response=run_response,
+                    run_context=run_context,
                 )
 
                 # If a parser model is provided, structure the response separately
@@ -4479,6 +4493,7 @@ async def _acontinue_run_stream(
                         session=agent_session,
                         run_response=run_response,
                         run_messages=run_messages,
+                        run_context=run_context,
                         stream_events=stream_events,
                     ):
                         await araise_if_cancelled(run_response.run_id)  # type: ignore
