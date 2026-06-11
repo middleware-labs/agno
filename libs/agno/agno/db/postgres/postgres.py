@@ -1,3 +1,4 @@
+import importlib
 import time
 from datetime import date, datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
@@ -614,12 +615,41 @@ class PostgresDb(BaseDb):
             raise ValueError(f"Table {self.db_schema}.{table_name} has an invalid schema")
 
         try:
+            self._run_pending_migrations_sync(table_name, table_type)
             table = Table(table_name, self.metadata, schema=self.db_schema, autoload_with=self.db_engine)
             return table
 
         except Exception as e:
             log_error(f"Error loading existing table {self.db_schema}.{table_name}: {str(e)}")
             raise
+
+    def _run_pending_migrations_sync(self, table_name: str, table_type: str) -> None:
+        """Run any pending migrations for an existing table before loading it."""
+        try:
+            from agno.db.migrations.manager import MigrationManager
+            from packaging import version as packaging_version
+
+            current = packaging_version.parse(self.get_latest_schema_version(table_name))
+            latest = MigrationManager(self).latest_schema_version
+            if current >= latest:
+                return
+
+            log_debug(f"Running pending migrations for {table_name}: {current} → {latest}")
+            for version_name, version_obj in MigrationManager.available_versions:
+                if version_obj <= current:
+                    continue
+                try:
+                    module = importlib.import_module(f"agno.db.migrations.versions.{version_name}")
+                    if hasattr(module, "up"):
+                        applied = module.up(self, table_type, table_name)
+                        if applied:
+                            log_debug(f"Applied migration {version_obj} on {table_name}")
+                except Exception as mig_err:
+                    log_warning(f"Migration {version_name} failed for {table_name}: {mig_err}")
+
+            self.upsert_schema_version(table_name=table_name, version=latest.public)
+        except Exception as e:
+            log_warning(f"Pending migration check failed for {table_name}: {e}")
 
     def get_latest_schema_version(self, table_name: str):
         """Get the latest version of the database schema."""
@@ -754,6 +784,9 @@ class PostgresDb(BaseDb):
 
             with self.Session() as sess:
                 stmt = select(table).where(table.c.session_id == session_id)
+
+                if session_type is not None:
+                    stmt = stmt.where(table.c.session_type == session_type.value)
 
                 if user_id is not None:
                     stmt = stmt.where(table.c.user_id == user_id)
@@ -999,7 +1032,7 @@ class PostgresDb(BaseDb):
                         updated_at=session_dict.get("created_at"),
                     )
                     stmt = stmt.on_conflict_do_update(  # type: ignore
-                        index_elements=["session_id"],
+                        index_elements=["session_id", "session_type"],
                         set_=dict(
                             agent_id=session_dict.get("agent_id"),
                             user_id=session_dict.get("user_id"),
@@ -1038,7 +1071,7 @@ class PostgresDb(BaseDb):
                         updated_at=session_dict.get("created_at"),
                     )
                     stmt = stmt.on_conflict_do_update(  # type: ignore
-                        index_elements=["session_id"],
+                        index_elements=["session_id", "session_type"],
                         set_=dict(
                             team_id=session_dict.get("team_id"),
                             user_id=session_dict.get("user_id"),
@@ -1077,7 +1110,7 @@ class PostgresDb(BaseDb):
                         updated_at=session_dict.get("created_at"),
                     )
                     stmt = stmt.on_conflict_do_update(  # type: ignore
-                        index_elements=["session_id"],
+                        index_elements=["session_id", "session_type"],
                         set_=dict(
                             workflow_id=session_dict.get("workflow_id"),
                             user_id=session_dict.get("user_id"),
@@ -1182,7 +1215,7 @@ class PostgresDb(BaseDb):
                         if col.name not in ["id", "session_id", "created_at"]
                     }
                     stmt = stmt.on_conflict_do_update(
-                        index_elements=["session_id"],
+                        index_elements=["session_id", "session_type"],
                         set_=update_columns,
                         where=(table.c.user_id == stmt.excluded.user_id) | (table.c.user_id.is_(None)),
                     ).returning(table)
@@ -1241,7 +1274,7 @@ class PostgresDb(BaseDb):
                         if col.name not in ["id", "session_id", "created_at"]
                     }
                     stmt = stmt.on_conflict_do_update(
-                        index_elements=["session_id"],
+                        index_elements=["session_id", "session_type"],
                         set_=update_columns,
                         where=(table.c.user_id == stmt.excluded.user_id) | (table.c.user_id.is_(None)),
                     ).returning(table)
@@ -1300,7 +1333,7 @@ class PostgresDb(BaseDb):
                         if col.name not in ["id", "session_id", "created_at"]
                     }
                     stmt = stmt.on_conflict_do_update(
-                        index_elements=["session_id"],
+                        index_elements=["session_id", "session_type"],
                         set_=update_columns,
                         where=(table.c.user_id == stmt.excluded.user_id) | (table.c.user_id.is_(None)),
                     ).returning(table)

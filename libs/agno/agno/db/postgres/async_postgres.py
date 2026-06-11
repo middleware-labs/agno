@@ -600,6 +600,9 @@ class AsyncPostgresDb(AsyncBaseDb):
             async with self.async_session_factory() as sess:
                 stmt = select(table).where(table.c.session_id == session_id)
 
+                if session_type is not None:
+                    stmt = stmt.where(table.c.session_type == session_type.value)
+
                 if user_id is not None:
                     stmt = stmt.where(table.c.user_id == user_id)
 
@@ -844,7 +847,7 @@ class AsyncPostgresDb(AsyncBaseDb):
                         updated_at=session_dict.get("created_at"),
                     )
                     stmt = stmt.on_conflict_do_update(  # type: ignore
-                        index_elements=["session_id"],
+                        index_elements=["session_id", "session_type"],
                         set_=dict(
                             agent_id=session_dict.get("agent_id"),
                             user_id=session_dict.get("user_id"),
@@ -885,7 +888,7 @@ class AsyncPostgresDb(AsyncBaseDb):
                         updated_at=session_dict.get("created_at"),
                     )
                     stmt = stmt.on_conflict_do_update(  # type: ignore
-                        index_elements=["session_id"],
+                        index_elements=["session_id", "session_type"],
                         set_=dict(
                             team_id=session_dict.get("team_id"),
                             user_id=session_dict.get("user_id"),
@@ -926,7 +929,7 @@ class AsyncPostgresDb(AsyncBaseDb):
                         updated_at=session_dict.get("created_at"),
                     )
                     stmt = stmt.on_conflict_do_update(  # type: ignore
-                        index_elements=["session_id"],
+                        index_elements=["session_id", "session_type"],
                         set_=dict(
                             workflow_id=session_dict.get("workflow_id"),
                             user_id=session_dict.get("user_id"),
