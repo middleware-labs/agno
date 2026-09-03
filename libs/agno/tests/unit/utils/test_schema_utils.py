@@ -7,9 +7,11 @@ from pydantic import BaseModel, Field
 from agno.utils.models.schema_utils import (
     _normalize_for_gemini,
     _normalize_for_openai,
+    contains_free_form_object,
     get_dict_value_type,
     get_response_schema_for_provider,
     is_dict_field,
+    is_free_form_object,
 )
 
 
@@ -58,6 +60,62 @@ def test_is_dict_field_negative_no_additional_properties():
     object_schema = {"type": "object", "description": "Regular object"}
 
     assert is_dict_field(object_schema) is False
+
+
+def test_is_free_form_object():
+    """Test dynamic-key maps are recognized regardless of how their values are described"""
+    assert is_free_form_object({"type": "object"}) is True
+    assert is_free_form_object({"type": "object", "additionalProperties": True}) is True
+    assert is_free_form_object({"type": "object", "additionalProperties": {"type": "integer"}}) is True
+
+    assert is_free_form_object({"type": "object", "properties": {}}) is False
+    assert is_free_form_object({"type": "object", "properties": {"name": {"type": "string"}}}) is False
+    assert is_free_form_object({"type": "string"}) is False
+    assert is_free_form_object("not a schema") is False
+
+
+def test_contains_free_form_object_ignores_root():
+    """Test the root parameter object is not itself treated as a map"""
+    schema = {"type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}
+
+    assert contains_free_form_object(schema) is False
+
+
+def test_contains_free_form_object_finds_nested_maps():
+    """Test maps are found wherever they are nested"""
+    in_property = {"type": "object", "properties": {"payload": {"type": "object"}}}
+    in_array = {"type": "object", "properties": {"rows": {"type": "array", "items": {"type": "object"}}}}
+    in_defs = {
+        "type": "object",
+        "properties": {"pick": {"$ref": "#/$defs/Pick"}},
+        "$defs": {"Pick": {"type": "object", "properties": {"context": {"type": "object"}}}},
+    }
+    deeply_nested = {
+        "type": "object",
+        "properties": {
+            "outer": {"type": "object", "properties": {"inner": {"type": "object", "additionalProperties": True}}}
+        },
+    }
+
+    assert contains_free_form_object(in_property) is True
+    assert contains_free_form_object(in_array) is True
+    assert contains_free_form_object(in_defs) is True
+    assert contains_free_form_object(deeply_nested) is True
+
+
+def test_contains_free_form_object_with_declared_nested_objects():
+    """Test fully declared nested objects are not reported as maps"""
+    schema = {
+        "type": "object",
+        "properties": {
+            "user": {
+                "type": "object",
+                "properties": {"name": {"type": "string"}},
+            }
+        },
+    }
+
+    assert contains_free_form_object(schema) is False
 
 
 def test_get_dict_value_type():

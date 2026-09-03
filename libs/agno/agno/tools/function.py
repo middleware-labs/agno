@@ -11,6 +11,7 @@ from agno.exceptions import AgentRunException, RunCancelledException
 from agno.media import Audio, File, Image, Video
 from agno.run import RunContext
 from agno.utils.log import log_debug, log_exception, log_warning
+from agno.utils.models.schema_utils import contains_free_form_object
 
 T = TypeVar("T")
 
@@ -630,6 +631,13 @@ class Function(BaseModel):
 
     def process_schema_for_strict(self):
         """Process the schema to make it strict mode compliant."""
+        if contains_free_form_object(self.parameters):
+            # Strict tool calling cannot express a dynamic-key map: providers only accept it as a
+            # closed object, which the model can then never populate. Falling back to non-strict
+            # tool calling keeps the argument usable instead of silently emptying it.
+            log_debug(f"Disabling strict mode for {self.name}: parameters contain a dynamic-key object")
+            self.strict = False
+            return
 
         def make_nested_strict(schema):
             """Recursively ensure all object schemas have additionalProperties: false"""
