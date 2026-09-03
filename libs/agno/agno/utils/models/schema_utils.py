@@ -27,6 +27,53 @@ def is_dict_field(schema: Dict[str, Any]) -> bool:
     )
 
 
+def is_free_form_object(schema: Any) -> bool:
+    """
+    Check if a schema is an object with no declared properties, i.e. a dynamic-key map.
+
+    Covers ``Dict[str, Any]``, ``Dict[str, T]`` and a bare ``{"type": "object"}``.
+
+    Args:
+        schema: JSON schema value
+
+    Returns:
+        bool: True if the schema describes an object whose keys are not known upfront
+    """
+    return isinstance(schema, dict) and schema.get("type") == "object" and "properties" not in schema
+
+
+def contains_free_form_object(schema: Any) -> bool:
+    """
+    Check if any schema nested inside ``schema`` is a dynamic-key map.
+
+    Only nested schemas are inspected: the root of a tool parameter schema is an object whose
+    properties are the arguments, so it is never itself a map.
+
+    Args:
+        schema: JSON schema dictionary to inspect
+
+    Returns:
+        bool: True if a nested dynamic-key map is present
+    """
+    if not isinstance(schema, dict):
+        return False
+
+    nested: list = []
+    for container in ("properties", "$defs", "definitions"):
+        value = schema.get(container)
+        if isinstance(value, dict):
+            nested.extend(value.values())
+    for combinator in ("anyOf", "oneOf", "allOf"):
+        value = schema.get(combinator)
+        if isinstance(value, list):
+            nested.extend(value)
+    items = schema.get("items")
+    if isinstance(items, dict):
+        nested.append(items)
+
+    return any(is_free_form_object(child) or contains_free_form_object(child) for child in nested)
+
+
 def get_dict_value_type(schema: Dict[str, Any]) -> str:
     """
     Extract the value type from a Dict field schema.

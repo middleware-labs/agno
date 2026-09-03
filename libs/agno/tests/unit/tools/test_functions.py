@@ -1,3 +1,4 @@
+import copy
 from typing import Any, Callable, Dict, List, Optional
 
 import pytest
@@ -329,6 +330,103 @@ def test_function_process_schema_for_strict():
     func.process_schema_for_strict()
     assert "param1" in func.parameters["required"]
     assert "param2" in func.parameters["required"]  # All properties should be required in strict mode
+
+
+def test_function_process_schema_for_strict_falls_back_for_free_form_dict():
+    """Test strict mode is disabled when a parameter is a dynamic-key object.
+
+    Strict tool calling can only express such a parameter as a closed object, which the model
+    can never populate, so the function must fall back to non-strict tool calling instead.
+    """
+    parameters = {
+        "type": "object",
+        "properties": {
+            "session_state_updates": {
+                "type": "object",
+                "description": "The updates to apply to the shared session state.",
+            }
+        },
+        "required": ["session_state_updates"],
+    }
+    func = Function(name="update_session_state", parameters=copy.deepcopy(parameters))
+
+    func.process_schema_for_strict()
+
+    assert func.strict is False
+    # The schema must stay usable, so strict-mode rewrites are not applied
+    assert func.parameters == parameters
+
+
+def test_function_process_schema_for_strict_falls_back_for_typed_dict():
+    """Test strict mode is disabled for Dict[str, T] parameters too"""
+    func = Function(
+        name="record_scores",
+        parameters={
+            "type": "object",
+            "properties": {"scores": {"type": "object", "additionalProperties": {"type": "integer"}}},
+            "required": ["scores"],
+        },
+    )
+
+    func.process_schema_for_strict()
+
+    assert func.strict is False
+    assert func.parameters["properties"]["scores"]["additionalProperties"] == {"type": "integer"}
+
+
+def test_function_process_schema_for_strict_keeps_strict_for_declared_objects():
+    """Test nested objects with declared properties are still processed for strict mode"""
+    func = Function(
+        name="test_func",
+        parameters={
+            "type": "object",
+            "properties": {
+                "user": {
+                    "type": "object",
+                    "properties": {"name": {"type": "string"}, "age": {"type": "number"}},
+                    "required": ["name"],
+                }
+            },
+            "required": ["user"],
+        },
+    )
+
+    func.process_schema_for_strict()
+
+    assert func.strict is None
+    assert func.parameters["additionalProperties"] is False
+    assert func.parameters["required"] == ["user"]
+    assert func.parameters["properties"]["user"]["additionalProperties"] is False
+
+
+def test_function_process_entrypoint_skipped_schema_falls_back_to_non_strict():
+    """Test a hand-written schema with skip_entrypoint_processing degrades instead of breaking"""
+
+    def _update(run_context: RunContext, session_state_updates: dict) -> str:
+        """Update state.
+
+        Args:
+            session_state_updates (dict): The updates to apply.
+        """
+        return "ok"
+
+    parameters = {
+        "type": "object",
+        "properties": {"session_state_updates": {"type": "object", "description": "The updates"}},
+        "required": ["session_state_updates"],
+    }
+    func = Function(
+        name="update_session_state",
+        entrypoint=_update,
+        parameters=copy.deepcopy(parameters),
+        skip_entrypoint_processing=True,
+    )
+
+    func.process_entrypoint(strict=True)
+
+    assert func.strict is False
+    assert func.parameters == parameters
+    assert func.to_dict()["strict"] is False
 
 
 def test_function_cache_key_generation():
