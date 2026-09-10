@@ -320,19 +320,19 @@ def test_search(mock_pgvector):
     with patch.object(mock_pgvector, "vector_search") as mock_vector_search:
         mock_pgvector.search_type = SearchType.vector
         mock_pgvector.search("test query")
-        mock_vector_search.assert_called_with(query="test query", limit=5, filters=None)
+        mock_vector_search.assert_called_with(query="test query", limit=5, filters=None, user_id=None)
 
     # Test keyword search
     with patch.object(mock_pgvector, "keyword_search") as mock_keyword_search:
         mock_pgvector.search_type = SearchType.keyword
         mock_pgvector.search("test query")
-        mock_keyword_search.assert_called_with(query="test query", limit=5, filters=None)
+        mock_keyword_search.assert_called_with(query="test query", limit=5, filters=None, user_id=None)
 
     # Test hybrid search
     with patch.object(mock_pgvector, "hybrid_search") as mock_hybrid_search:
         mock_pgvector.search_type = SearchType.hybrid
         mock_pgvector.search("test query")
-        mock_hybrid_search.assert_called_with(query="test query", limit=5, filters=None)
+        mock_hybrid_search.assert_called_with(query="test query", limit=5, filters=None, user_id=None)
 
 
 def test_vector_search(mock_pgvector, mock_embedder):
@@ -461,6 +461,67 @@ async def test_async_upsert(mock_pgvector):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("enable_batch", [False, True])
+async def test_async_upsert_429_no_write(mock_pgvector, enable_batch):
+    """On 429 during embedding, async upsert should raise and write nothing (batch and non-batch)."""
+
+    docs = [
+        Document(id="doc_0", content="rate limited doc 0", name="d0"),
+        Document(id="doc_1", content="rate limited doc 1", name="d1"),
+    ]
+
+    async def _raise_429(*args, **kwargs):
+        raise Exception("Error code: 429")
+
+    if enable_batch:
+
+        class RateLimitedEmbedder:
+            enable_batch = True
+
+            async def async_get_embeddings_batch_and_usage(self, texts):
+                raise Exception("Error code: 429")
+
+        mock_pgvector.embedder = RateLimitedEmbedder()
+        embedder_patcher = None
+    else:
+
+        class RateLimitedEmbedder:
+            enable_batch = False
+
+        mock_pgvector.embedder = RateLimitedEmbedder()
+        embedder_patcher = patch("agno.knowledge.document.Document.async_embed", new=_raise_429)
+
+    sess = MagicMock()
+    cm = MagicMock()
+    cm.__enter__.return_value = sess
+    mock_pgvector.Session.return_value = cm
+
+    with patch("agno.vectordb.pgvector.pgvector.postgresql.insert") as mock_insert:
+        if embedder_patcher is not None:
+            with embedder_patcher:
+                with pytest.raises(Exception, match="429"):
+                    await mock_pgvector._async_upsert(
+                        content_hash="h",
+                        documents=docs,
+                        filters=None,
+                        batch_size=100,
+                    )
+        else:
+            with pytest.raises(Exception, match="429"):
+                await mock_pgvector._async_upsert(
+                    content_hash="h",
+                    documents=docs,
+                    filters=None,
+                    batch_size=100,
+                )
+
+        assert not mock_insert.called
+        assert not sess.execute.called
+        assert not sess.commit.called
+        assert sess.rollback.called
+
+
+@pytest.mark.asyncio
 async def test_async_search(mock_pgvector):
     """Test async_search method."""
     expected_results = [Document(id="test", content="Test document")]
@@ -475,7 +536,7 @@ async def test_async_search(mock_pgvector):
 
         # Check results and that search was called via to_thread
         assert results == expected_results
-        mock_to_thread.assert_called_once_with(mock_pgvector.search, "test query", 5, None)
+        mock_to_thread.assert_called_once_with(mock_pgvector.search, "test query", 5, None, None)
 
 
 @pytest.mark.asyncio
@@ -1095,17 +1156,6 @@ def test_prefix_match_default_is_false(mock_engine, mock_embedder):
     assert db.prefix_match is False
     expr = db._build_ts_query("anything")
     assert _ts_query_name(expr) == "websearch_to_tsquery"
-
-
-def test_enable_prefix_matching_still_works(mock_engine, mock_embedder):
-    """The legacy public helper still returns the `tok*` string it always has —
-    kept for backwards compatibility even though `_build_ts_query` is the correct path now.
-    """
-    db = _make_db(mock_engine, mock_embedder, prefix_match=True)
-
-    assert db.enable_prefix_matching("ani") == "ani*"
-    assert db.enable_prefix_matching("wildlife san") == "wildlife* san*"
-    assert db.enable_prefix_matching("") == ""
 
 
 def test_keyword_search_returns_empty_on_no_usable_tokens(mock_engine, mock_embedder):
