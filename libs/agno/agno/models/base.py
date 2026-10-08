@@ -2072,7 +2072,7 @@ class Model(ABC):
                             role=self.tool_message_role,
                             tool_call_id=_tool_call_id,
                             tool_name=_tool_call_name,
-                            content="Error: The requested tool does not exist or is not available.",
+                            content=self._unknown_tool_error(_tool_call_name, functions),
                         )
                     )
                     continue
@@ -2088,6 +2088,22 @@ class Model(ABC):
                     continue
                 function_calls_to_run.append(_function_call)
         return function_calls_to_run
+
+    @staticmethod
+    def _unknown_tool_error(tool_name: Optional[str], functions: Optional[Dict[str, Function]]) -> str:
+        """Tool result for a call to a tool that is not registered.
+
+        Team leaders sometimes call a member id as a tool. When the delegation tool is
+        available, name it so the model can retry the step through it.
+        """
+        if tool_name and functions and "delegate_task_to_member" in functions:
+            return (
+                f"Error: `{tool_name}` is not a tool, so this call did not reach any team member. "
+                "Team members are not callable as tools. "
+                f"If `{tool_name}` is a team member id, retry with "
+                f'`delegate_task_to_member(member_id="{tool_name}", task=...)`.'
+            )
+        return "Error: The requested tool does not exist or is not available."
 
     @staticmethod
     def _offload_candidate(
