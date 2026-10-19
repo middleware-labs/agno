@@ -4,12 +4,13 @@ requires-python = ">=3.13"
 
 [[package]]
 name = "agno"
-version = "2.0.4"
+version = "2.5.5"
 source = { editable = "../../../../libs/agno" }
 dependencies = [
     { name = "docstring-parser" },
     { name = "gitpython" },
-    { name = "httpx" },
+    { name = "h11" },
+    { name = "httpx", extra = ["http2"] },
     { name = "packaging" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -23,16 +24,19 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "a2a-sdk", marker = "extra == 'a2a'" },
     { name = "ag-ui-protocol", marker = "extra == 'agui'" },
     { name = "agentql", marker = "extra == 'agentql'" },
+    { name = "agno", extras = ["a2a"], marker = "extra == 'tests'" },
     { name = "agno", extras = ["agentql"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["agui"], marker = "extra == 'tests'" },
     { name = "agno", extras = ["anthropic"], marker = "extra == 'models'" },
     { name = "agno", extras = ["apify"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["arxiv"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["async-mongo"], marker = "extra == 'storage'" },
+    { name = "agno", extras = ["async-postgres"], marker = "extra == 'storage'" },
     { name = "agno", extras = ["aws-bedrock"], marker = "extra == 'models'" },
     { name = "agno", extras = ["azure"], marker = "extra == 'models'" },
-    { name = "agno", extras = ["brave"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["browserbase"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["cartesia"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["cassandra"], marker = "extra == 'vectordbs'" },
@@ -47,6 +51,7 @@ requires-dist = [
     { name = "agno", extras = ["crawl4ai"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["csv"], marker = "extra == 'knowledge'" },
     { name = "agno", extras = ["ddg"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["dev"], marker = "extra == 'demo'" },
     { name = "agno", extras = ["dev"], marker = "extra == 'tests'" },
     { name = "agno", extras = ["docx"], marker = "extra == 'knowledge'" },
     { name = "agno", extras = ["duckdb"], marker = "extra == 'tools'" },
@@ -54,6 +59,7 @@ requires-dist = [
     { name = "agno", extras = ["embedders"], marker = "extra == 'tests'" },
     { name = "agno", extras = ["evm"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["exa"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["excel"], marker = "extra == 'knowledge'" },
     { name = "agno", extras = ["fal"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["firecrawl"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["firestore"], marker = "extra == 'storage'" },
@@ -66,7 +72,7 @@ requires-dist = [
     { name = "agno", extras = ["groq"], marker = "extra == 'models'" },
     { name = "agno", extras = ["huggingface"], marker = "extra == 'embedders'" },
     { name = "agno", extras = ["ibm"], marker = "extra == 'models'" },
-    { name = "agno", extras = ["infinity"], marker = "extra == 'models'" },
+    { name = "agno", extras = ["integration-tests"], marker = "extra == 'tests'" },
     { name = "agno", extras = ["knowledge"], marker = "extra == 'tests'" },
     { name = "agno", extras = ["lancedb"], marker = "extra == 'vectordbs'" },
     { name = "agno", extras = ["litellm"], marker = "extra == 'models'" },
@@ -82,26 +88,38 @@ requires-dist = [
     { name = "agno", extras = ["mongodb"], marker = "extra == 'vectordbs'" },
     { name = "agno", extras = ["neo4j"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["newspaper"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["notion"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["ollama"], marker = "extra == 'models'" },
     { name = "agno", extras = ["openai"], marker = "extra == 'models'" },
     { name = "agno", extras = ["opencv"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["opentelemetry"], marker = "extra == 'arize'" },
     { name = "agno", extras = ["opentelemetry"], marker = "extra == 'openlit'" },
     { name = "agno", extras = ["oxylabs"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["parallel"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["pdf"], marker = "extra == 'knowledge'" },
     { name = "agno", extras = ["performance"], marker = "extra == 'tests'" },
     { name = "agno", extras = ["pgvector"], marker = "extra == 'vectordbs'" },
     { name = "agno", extras = ["pinecone"], marker = "extra == 'vectordbs'" },
     { name = "agno", extras = ["portkey"], marker = "extra == 'models'" },
     { name = "agno", extras = ["postgres"], marker = "extra == 'storage'" },
+    { name = "agno", extras = ["pptx"], marker = "extra == 'knowledge'" },
     { name = "agno", extras = ["psycopg"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["pylance"], marker = "extra == 'vectordbs'" },
     { name = "agno", extras = ["qdrant"], marker = "extra == 'vectordbs'" },
     { name = "agno", extras = ["redis"], marker = "extra == 'storage'" },
+    { name = "agno", extras = ["redis"], marker = "extra == 'vectordbs'" },
+    { name = "agno", extras = ["redshift"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["reportlab"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["scheduler"], marker = "extra == 'demo'" },
+    { name = "agno", extras = ["scrapegraph"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["seltz"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["singlestore"], marker = "extra == 'vectordbs'" },
+    { name = "agno", extras = ["slack"], marker = "extra == 'tests'" },
     { name = "agno", extras = ["sql"], marker = "extra == 'storage'" },
     { name = "agno", extras = ["sqlite"], marker = "extra == 'storage'" },
     { name = "agno", extras = ["storage"], marker = "extra == 'tests'" },
     { name = "agno", extras = ["surrealdb"], marker = "extra == 'vectordbs'" },
+    { name = "agno", extras = ["tavily"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["text"], marker = "extra == 'knowledge'" },
     { name = "agno", extras = ["todoist"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["tools"], marker = "extra == 'tests'" },
@@ -109,8 +127,10 @@ requires-dist = [
     { name = "agno", extras = ["upstash"], marker = "extra == 'vectordbs'" },
     { name = "agno", extras = ["valyu"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["vectordbs"], marker = "extra == 'tests'" },
+    { name = "agno", extras = ["vllm"], marker = "extra == 'embedders'" },
     { name = "agno", extras = ["weaviate"], marker = "extra == 'vectordbs'" },
     { name = "agno", extras = ["webex"], marker = "extra == 'tools'" },
+    { name = "agno", extras = ["yfinance"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["youtube"], marker = "extra == 'tools'" },
     { name = "agno", extras = ["zep"], marker = "extra == 'tools'" },
     { name = "agno-infra", marker = "extra == 'infra'" },
@@ -123,9 +143,12 @@ requires-dist = [
     { name = "aiofiles", marker = "extra == 'text'" },
     { name = "aiohttp", marker = "extra == 'azure'" },
     { name = "anthropic", marker = "extra == 'anthropic'" },
+    { name = "anthropic", marker = "extra == 'demo'" },
     { name = "apify-client", marker = "extra == 'apify'" },
     { name = "arize-phoenix", marker = "extra == 'arize'" },
     { name = "arxiv", marker = "extra == 'arxiv'" },
+    { name = "asyncmy", marker = "extra == 'mysql'" },
+    { name = "asyncpg", marker = "extra == 'async-postgres'" },
     { name = "atlassian-python-api", marker = "extra == 'confluence'" },
     { name = "azure-ai-inference", marker = "extra == 'azure'" },
     { name = "boto3", marker = "extra == 'aws-bedrock'" },
@@ -134,27 +157,38 @@ requires-dist = [
     { name = "build", marker = "extra == 'tests'" },
     { name = "cartesia", marker = "extra == 'cartesia'" },
     { name = "cassio", marker = "extra == 'cassandra'" },
+    { name = "cel-python", marker = "extra == 'cel'" },
     { name = "cerebras-cloud-sdk", marker = "extra == 'cerebras'" },
     { name = "chonkie", marker = "extra == 'chonkie'" },
-    { name = "chonkie", extras = ["st"], marker = "extra == 'chonkie'" },
+    { name = "chonkie", extras = ["code"], marker = "extra == 'chonkie'" },
+    { name = "chonkie", extras = ["semantic"], marker = "extra == 'chonkie'" },
     { name = "chromadb", marker = "extra == 'chromadb'" },
+    { name = "chromadb", marker = "extra == 'demo'" },
     { name = "clickhouse-connect", marker = "extra == 'clickhouse'" },
     { name = "cohere", marker = "extra == 'cohere'" },
     { name = "couchbase", marker = "extra == 'couchbase'" },
-    { name = "crawl4ai", marker = "extra == 'crawl4ai'" },
+    { name = "crawl4ai", marker = "extra == 'crawl4ai'", specifier = ">=0.6.3" },
+    { name = "croniter", marker = "extra == 'os'", specifier = ">=1.3" },
+    { name = "croniter", marker = "extra == 'scheduler'", specifier = ">=1.3" },
     { name = "daytona", marker = "extra == 'daytona'" },
     { name = "ddgs", marker = "extra == 'ddg'" },
+    { name = "ddgs", marker = "extra == 'demo'" },
     { name = "ddgs", marker = "extra == 'integration-tests'" },
     { name = "docstring-parser" },
+    { name = "duckdb", marker = "extra == 'demo'" },
     { name = "duckdb", marker = "extra == 'duckdb'" },
     { name = "elevenlabs", marker = "extra == 'elevenlabs'" },
     { name = "email-validator", marker = "extra == 'cookbooks'" },
+    { name = "exa-py", marker = "extra == 'demo'" },
     { name = "exa-py", marker = "extra == 'exa'" },
     { name = "exa-py", marker = "extra == 'integration-tests'" },
+    { name = "fakeredis", marker = "extra == 'dev'" },
     { name = "fal-client", marker = "extra == 'fal'" },
     { name = "fastapi", marker = "extra == 'dev'" },
-    { name = "fastapi", marker = "extra == 'os'" },
-    { name = "firecrawl-py", marker = "extra == 'firecrawl'" },
+    { name = "fastapi", extras = ["standard"], marker = "extra == 'demo'" },
+    { name = "fastapi", extras = ["standard"], marker = "extra == 'os'" },
+    { name = "fastmcp", marker = "extra == 'integration-tests'" },
+    { name = "firecrawl-py", marker = "extra == 'firecrawl'", specifier = "==3.4.0" },
     { name = "gitpython" },
     { name = "google-api-python-client", marker = "extra == 'gmail'" },
     { name = "google-auth-httplib2", marker = "extra == 'gmail'" },
@@ -162,55 +196,83 @@ requires-dist = [
     { name = "google-cloud-bigquery", marker = "extra == 'google-bigquery'" },
     { name = "google-cloud-firestore", marker = "extra == 'firestore'" },
     { name = "google-cloud-storage", marker = "extra == 'gcs'" },
-    { name = "google-genai", marker = "extra == 'google'" },
+    { name = "google-genai", marker = "extra == 'demo'" },
+    { name = "google-genai", marker = "extra == 'google'", specifier = ">=1.52.0" },
     { name = "google-maps-places", marker = "extra == 'googlemaps'" },
     { name = "googlemaps", marker = "extra == 'googlemaps'" },
     { name = "groq", marker = "extra == 'groq'" },
-    { name = "httpx" },
+    { name = "grpcio", marker = "extra == 'tests'", specifier = "==1.74.0" },
+    { name = "h11", specifier = ">=0.16.0" },
+    { name = "httpx", extras = ["http2"] },
     { name = "huggingface-hub", marker = "extra == 'huggingface'" },
     { name = "ibm-watsonx-ai", marker = "extra == 'ibm'" },
     { name = "infinity-client", marker = "extra == 'infinity'" },
     { name = "inquirer", marker = "extra == 'cookbooks'" },
-    { name = "lancedb", marker = "extra == 'lancedb'", specifier = ">=0.24.0" },
+    { name = "lancedb", marker = "extra == 'lancedb'", specifier = ">=0.26.0" },
     { name = "langfuse", marker = "extra == 'langfuse'" },
     { name = "litellm", marker = "extra == 'litellm'" },
     { name = "llama-api-client", marker = "extra == 'meta'" },
     { name = "lmstudio", marker = "extra == 'lmstudio'" },
     { name = "lxml-html-clean", marker = "extra == 'newspaper'" },
     { name = "markdown", marker = "extra == 'markdown'" },
+    { name = "matplotlib", marker = "extra == 'demo'" },
     { name = "matplotlib", marker = "extra == 'matplotlib'" },
-    { name = "mcp", marker = "extra == 'mcp'" },
+    { name = "mcp", marker = "extra == 'demo'" },
+    { name = "mcp", marker = "extra == 'dev'" },
+    { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.9.2" },
     { name = "mem0ai", marker = "extra == 'mem0'" },
-    { name = "memorisdk", marker = "extra == 'memori'" },
+    { name = "memori", marker = "extra == 'memori'", specifier = ">=3.0.5" },
     { name = "memory-profiler", marker = "extra == 'performance'" },
     { name = "mistralai", marker = "extra == 'mistral'" },
-    { name = "mypy", marker = "extra == 'dev'" },
+    { name = "motor", marker = "extra == 'async-mongo'" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = "==1.18.2" },
     { name = "neo4j", marker = "extra == 'neo4j'" },
+    { name = "nest-asyncio", marker = "extra == 'demo'" },
     { name = "newspaper4k", marker = "extra == 'newspaper'" },
+    { name = "notion-client", marker = "extra == 'notion'" },
     { name = "ollama", marker = "extra == 'ollama'" },
+    { name = "openai", marker = "extra == 'demo'" },
+    { name = "openai", marker = "extra == 'dev'" },
     { name = "openai", marker = "extra == 'openai'" },
     { name = "opencv-python", marker = "extra == 'opencv'" },
+    { name = "openinference-instrumentation-agno", marker = "extra == 'demo'" },
+    { name = "openinference-instrumentation-agno", marker = "extra == 'os'" },
     { name = "openlit", marker = "extra == 'openlit'" },
+    { name = "openpyxl", marker = "extra == 'excel'" },
+    { name = "opentelemetry-api", marker = "extra == 'demo'" },
     { name = "opentelemetry-distro", marker = "extra == 'arize'" },
     { name = "opentelemetry-exporter-otlp", marker = "extra == 'opentelemetry'" },
     { name = "opentelemetry-exporter-otlp-proto-grpc", marker = "extra == 'arize'" },
+    { name = "opentelemetry-sdk", marker = "extra == 'demo'" },
     { name = "opentelemetry-sdk", marker = "extra == 'opentelemetry'" },
+    { name = "opentelemetry-sdk", marker = "extra == 'os'" },
     { name = "oxylabs", marker = "extra == 'oxylabs'" },
     { name = "packaging" },
+    { name = "pandas", marker = "extra == 'demo'" },
+    { name = "parallel-web", marker = "extra == 'demo'" },
+    { name = "parallel-web", marker = "extra == 'parallel'" },
+    { name = "pgvector", marker = "extra == 'demo'" },
     { name = "pgvector", marker = "extra == 'pgvector'" },
+    { name = "pillow", marker = "extra == 'demo'" },
     { name = "pillow", marker = "extra == 'integration-tests'" },
     { name = "pinecone", marker = "extra == 'pinecone'", specifier = "==5.4.2" },
     { name = "playwright", marker = "extra == 'browserbase'" },
     { name = "portkey-ai", marker = "extra == 'portkey'" },
     { name = "psycopg", marker = "extra == 'psycopg'" },
+    { name = "psycopg", extras = ["binary"], marker = "extra == 'demo'" },
     { name = "psycopg-binary", marker = "extra == 'postgres'" },
     { name = "psycopg-binary", marker = "extra == 'psycopg'" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "pygithub", marker = "extra == 'github'" },
+    { name = "pyjwt", marker = "extra == 'dev'" },
+    { name = "pyjwt", marker = "extra == 'os'" },
     { name = "pylance", marker = "extra == 'pylance'" },
     { name = "pymilvus", marker = "extra == 'milvusdb'", specifier = ">=2.5.10" },
+    { name = "pymongo", marker = "extra == 'async-mongo'", specifier = ">=4.9" },
     { name = "pymongo", extras = ["srv"], marker = "extra == 'mongodb'" },
+    { name = "pymysql", marker = "extra == 'mysql'" },
+    { name = "pypdf", marker = "extra == 'demo'" },
     { name = "pypdf", marker = "extra == 'pdf'" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-asyncio", marker = "extra == 'dev'" },
@@ -219,27 +281,42 @@ requires-dist = [
     { name = "python-docx", marker = "extra == 'docx'" },
     { name = "python-dotenv" },
     { name = "python-multipart" },
+    { name = "python-pptx", marker = "extra == 'pptx'" },
+    { name = "pytz", marker = "extra == 'os'", specifier = ">=2023.3" },
+    { name = "pytz", marker = "extra == 'scheduler'", specifier = ">=2023.3" },
     { name = "pyyaml" },
     { name = "qdrant-client", marker = "extra == 'qdrant'" },
     { name = "rapidocr-onnxruntime", marker = "extra == 'pdf'" },
     { name = "redis", marker = "extra == 'redis'" },
+    { name = "redisvl", marker = "extra == 'redis'", specifier = ">=0.12.1" },
+    { name = "redshift-connector", marker = "extra == 'redshift'" },
+    { name = "reportlab", marker = "extra == 'reportlab'" },
     { name = "rich" },
-    { name = "ruff", marker = "extra == 'dev'" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = "==0.14.3" },
+    { name = "scrapegraph-py", marker = "extra == 'scrapegraph'" },
+    { name = "seltz", marker = "extra == 'seltz'" },
+    { name = "slack-sdk", marker = "extra == 'slack'", specifier = ">=3.40.0" },
+    { name = "sqlalchemy", marker = "extra == 'demo'" },
     { name = "sqlalchemy", marker = "extra == 'integration-tests'" },
+    { name = "sqlalchemy", marker = "extra == 'os'" },
     { name = "sqlalchemy", marker = "extra == 'singlestore'" },
     { name = "sqlalchemy", marker = "extra == 'sql'" },
     { name = "sqlalchemy", marker = "extra == 'sqlite'" },
     { name = "surrealdb", marker = "extra == 'surrealdb'", specifier = ">=1.0.4" },
     { name = "tantivy", marker = "extra == 'lancedb'" },
+    { name = "tavily-python", marker = "extra == 'tavily'" },
+    { name = "tiktoken", marker = "extra == 'tokenizers'" },
     { name = "timeout-decorator", marker = "extra == 'dev'" },
     { name = "todoist-api-python", marker = "extra == 'todoist'" },
+    { name = "tokenizers", marker = "extra == 'tokenizers'" },
     { name = "trafilatura", marker = "extra == 'trafilatura'" },
     { name = "twine", marker = "extra == 'tests'" },
     { name = "typer" },
     { name = "types-aiofiles", marker = "extra == 'dev'" },
+    { name = "types-greenlet", marker = "extra == 'dev'" },
     { name = "types-pyyaml", marker = "extra == 'dev'" },
     { name = "typing-extensions" },
-    { name = "unstructured", marker = "extra == 'markdown'" },
+    { name = "unstructured", marker = "extra == 'markdown'", specifier = "<0.18.31" },
     { name = "upstash-vector", marker = "extra == 'upstash'" },
     { name = "uvicorn", marker = "extra == 'dev'" },
     { name = "uvicorn", marker = "extra == 'os'" },
@@ -248,12 +325,16 @@ requires-dist = [
     { name = "weaviate-client", marker = "extra == 'weaviate'" },
     { name = "web3", marker = "extra == 'evm'" },
     { name = "webexpythonsdk", marker = "extra == 'webex'" },
+    { name = "xlrd", marker = "extra == 'excel'" },
+    { name = "xlwt", marker = "extra == 'dev'" },
+    { name = "yfinance", marker = "extra == 'demo'" },
     { name = "yfinance", marker = "extra == 'integration-tests'" },
     { name = "yfinance", marker = "extra == 'yfinance'" },
+    { name = "youtube-transcript-api", marker = "extra == 'demo'" },
     { name = "youtube-transcript-api", marker = "extra == 'youtube'" },
     { name = "zep-cloud", marker = "extra == 'zep'" },
 ]
-provides-extras = ["dev", "os", "integration-tests", "opentelemetry", "weave", "openlit", "arize", "langfuse", "aws-bedrock", "anthropic", "azure", "cerebras", "cohere", "infinity", "google", "groq", "ibm", "litellm", "lmstudio", "meta", "mistral", "ollama", "openai", "portkey", "agentql", "apify", "arxiv", "brave", "browserbase", "cartesia", "confluence", "ddg", "duckdb", "elevenlabs", "evm", "exa", "fal", "firecrawl", "crawl4ai", "github", "gmail", "google-bigquery", "googlemaps", "matplotlib", "mcp", "mem0", "memori", "newspaper", "opencv", "psycopg", "todoist", "valyu", "webex", "yfinance", "youtube", "zep", "daytona", "oxylabs", "trafilatura", "neo4j", "sql", "postgres", "sqlite", "gcs", "firestore", "redis", "pgvector", "chromadb", "lancedb", "pylance", "qdrant", "couchbase", "cassandra", "mongodb", "singlestore", "weaviate", "milvusdb", "clickhouse", "pinecone", "surrealdb", "upstash", "pdf", "docx", "text", "csv", "markdown", "chonkie", "agui", "huggingface", "performance", "cookbooks", "docker", "aws", "infra", "models", "tools", "storage", "vectordbs", "knowledge", "embedders", "tests"]
+provides-extras = ["dev", "os", "scheduler", "opentelemetry", "weave", "openlit", "arize", "langfuse", "aws-bedrock", "anthropic", "azure", "cerebras", "cohere", "infinity", "google", "groq", "ibm", "litellm", "lmstudio", "meta", "mistral", "ollama", "openai", "portkey", "tokenizers", "cel", "agentql", "apify", "arxiv", "brave", "browserbase", "cartesia", "confluence", "ddg", "duckdb", "elevenlabs", "evm", "exa", "seltz", "fal", "firecrawl", "tavily", "crawl4ai", "github", "gmail", "google-bigquery", "googlemaps", "matplotlib", "mcp", "mem0", "memori", "newspaper", "notion", "opencv", "parallel", "psycopg", "redshift", "reportlab", "scrapegraph", "todoist", "valyu", "webex", "yfinance", "youtube", "zep", "daytona", "oxylabs", "trafilatura", "neo4j", "sql", "postgres", "async-postgres", "async-mongo", "sqlite", "gcs", "firestore", "redis", "mysql", "pgvector", "chromadb", "lancedb", "pylance", "qdrant", "couchbase", "cassandra", "mongodb", "singlestore", "weaviate", "milvusdb", "clickhouse", "pinecone", "surrealdb", "upstash", "pdf", "docx", "pptx", "text", "csv", "excel", "markdown", "chonkie", "agui", "a2a", "slack", "huggingface", "performance", "cookbooks", "docker", "aws", "infra", "models", "tools", "storage", "vectordbs", "knowledge", "embedders", "tests", "integration-tests", "demo"]
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -536,18 +617,20 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/49/e8/58c7f85958bda41dafea50497cbd59738c5c43dbbea5ee83d651234398f4/greenlet-3.2.4-cp313-cp313-macosx_11_0_universal2.whl", hash = "sha256:1a921e542453fe531144e91e1feedf12e07351b1cf6c9e8a3325ea600a715a31", size = 272814, upload-time = "2025-08-07T13:15:50.011Z" },
     { url = "https://files.pythonhosted.org/packages/62/dd/b9f59862e9e257a16e4e610480cfffd29e3fae018a68c2332090b53aac3d/greenlet-3.2.4-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:cd3c8e693bff0fff6ba55f140bf390fa92c994083f838fece0f63be121334945", size = 641073, upload-time = "2025-08-07T13:42:57.23Z" },
     { url = "https://files.pythonhosted.org/packages/f7/0b/bc13f787394920b23073ca3b6c4a7a21396301ed75a655bcb47196b50e6e/greenlet-3.2.4-cp313-cp313-manylinux2014_ppc64le.manylinux_2_17_ppc64le.whl", hash = "sha256:710638eb93b1fa52823aa91bf75326f9ecdfd5e0466f00789246a5280f4ba0fc", size = 655191, upload-time = "2025-08-07T13:45:29.752Z" },
-    { url = "https://files.pythonhosted.org/packages/f2/d6/6adde57d1345a8d0f14d31e4ab9c23cfe8e2cd39c3baf7674b4b0338d266/greenlet-3.2.4-cp313-cp313-manylinux2014_s390x.manylinux_2_17_s390x.whl", hash = "sha256:c5111ccdc9c88f423426df3fd1811bfc40ed66264d35aa373420a34377efc98a", size = 649516, upload-time = "2025-08-07T13:53:16.314Z" },
     { url = "https://files.pythonhosted.org/packages/7f/3b/3a3328a788d4a473889a2d403199932be55b1b0060f4ddd96ee7cdfcad10/greenlet-3.2.4-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:d76383238584e9711e20ebe14db6c88ddcedc1829a9ad31a584389463b5aa504", size = 652169, upload-time = "2025-08-07T13:18:32.861Z" },
     { url = "https://files.pythonhosted.org/packages/ee/43/3cecdc0349359e1a527cbf2e3e28e5f8f06d3343aaf82ca13437a9aa290f/greenlet-3.2.4-cp313-cp313-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:23768528f2911bcd7e475210822ffb5254ed10d71f4028387e5a99b4c6699671", size = 610497, upload-time = "2025-08-07T13:18:31.636Z" },
     { url = "https://files.pythonhosted.org/packages/b8/19/06b6cf5d604e2c382a6f31cafafd6f33d5dea706f4db7bdab184bad2b21d/greenlet-3.2.4-cp313-cp313-musllinux_1_1_aarch64.whl", hash = "sha256:00fadb3fedccc447f517ee0d3fd8fe49eae949e1cd0f6a611818f4f6fb7dc83b", size = 1121662, upload-time = "2025-08-07T13:42:41.117Z" },
     { url = "https://files.pythonhosted.org/packages/a2/15/0d5e4e1a66fab130d98168fe984c509249c833c1a3c16806b90f253ce7b9/greenlet-3.2.4-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:d25c5091190f2dc0eaa3f950252122edbbadbb682aa7b1ef2f8af0f8c0afefae", size = 1149210, upload-time = "2025-08-07T13:18:24.072Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/53/f9c440463b3057485b8594d7a638bed53ba531165ef0ca0e6c364b5cc807/greenlet-3.2.4-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:6e343822feb58ac4d0a1211bd9399de2b3a04963ddeec21530fc426cc121f19b", size = 1564759, upload-time = "2025-11-04T12:42:19.395Z" },
+    { url = "https://files.pythonhosted.org/packages/47/e4/3bb4240abdd0a8d23f4f88adec746a3099f0d86bfedb623f063b2e3b4df0/greenlet-3.2.4-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:ca7f6f1f2649b89ce02f6f229d7c19f680a6238af656f61e0115b24857917929", size = 1634288, upload-time = "2025-11-04T12:42:21.174Z" },
     { url = "https://files.pythonhosted.org/packages/0b/55/2321e43595e6801e105fcfdee02b34c0f996eb71e6ddffca6b10b7e1d771/greenlet-3.2.4-cp313-cp313-win_amd64.whl", hash = "sha256:554b03b6e73aaabec3745364d6239e9e012d64c68ccd0b8430c64ccc14939a8b", size = 299685, upload-time = "2025-08-07T13:24:38.824Z" },
     { url = "https://files.pythonhosted.org/packages/22/5c/85273fd7cc388285632b0498dbbab97596e04b154933dfe0f3e68156c68c/greenlet-3.2.4-cp314-cp314-macosx_11_0_universal2.whl", hash = "sha256:49a30d5fda2507ae77be16479bdb62a660fa51b1eb4928b524975b3bde77b3c0", size = 273586, upload-time = "2025-08-07T13:16:08.004Z" },
     { url = "https://files.pythonhosted.org/packages/d1/75/10aeeaa3da9332c2e761e4c50d4c3556c21113ee3f0afa2cf5769946f7a3/greenlet-3.2.4-cp314-cp314-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:299fd615cd8fc86267b47597123e3f43ad79c9d8a22bebdce535e53550763e2f", size = 686346, upload-time = "2025-08-07T13:42:59.944Z" },
     { url = "https://files.pythonhosted.org/packages/c0/aa/687d6b12ffb505a4447567d1f3abea23bd20e73a5bed63871178e0831b7a/greenlet-3.2.4-cp314-cp314-manylinux2014_ppc64le.manylinux_2_17_ppc64le.whl", hash = "sha256:c17b6b34111ea72fc5a4e4beec9711d2226285f0386ea83477cbb97c30a3f3a5", size = 699218, upload-time = "2025-08-07T13:45:30.969Z" },
-    { url = "https://files.pythonhosted.org/packages/dc/8b/29aae55436521f1d6f8ff4e12fb676f3400de7fcf27fccd1d4d17fd8fecd/greenlet-3.2.4-cp314-cp314-manylinux2014_s390x.manylinux_2_17_s390x.whl", hash = "sha256:b4a1870c51720687af7fa3e7cda6d08d801dae660f75a76f3845b642b4da6ee1", size = 694659, upload-time = "2025-08-07T13:53:17.759Z" },
     { url = "https://files.pythonhosted.org/packages/92/2e/ea25914b1ebfde93b6fc4ff46d6864564fba59024e928bdc7de475affc25/greenlet-3.2.4-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:061dc4cf2c34852b052a8620d40f36324554bc192be474b9e9770e8c042fd735", size = 695355, upload-time = "2025-08-07T13:18:34.517Z" },
     { url = "https://files.pythonhosted.org/packages/72/60/fc56c62046ec17f6b0d3060564562c64c862948c9d4bc8aa807cf5bd74f4/greenlet-3.2.4-cp314-cp314-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:44358b9bf66c8576a9f57a590d5f5d6e72fa4228b763d0e43fee6d3b06d3a337", size = 657512, upload-time = "2025-08-07T13:18:33.969Z" },
+    { url = "https://files.pythonhosted.org/packages/23/6e/74407aed965a4ab6ddd93a7ded3180b730d281c77b765788419484cdfeef/greenlet-3.2.4-cp314-cp314-musllinux_1_2_aarch64.whl", hash = "sha256:2917bdf657f5859fbf3386b12d68ede4cf1f04c90c3a6bc1f013dd68a22e2269", size = 1612508, upload-time = "2025-11-04T12:42:23.427Z" },
+    { url = "https://files.pythonhosted.org/packages/0d/da/343cd760ab2f92bac1845ca07ee3faea9fe52bee65f7bcb19f16ad7de08b/greenlet-3.2.4-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:015d48959d4add5d6c9f6c5210ee3803a830dce46356e3bc326d6776bde54681", size = 1680760, upload-time = "2025-11-04T12:42:25.341Z" },
     { url = "https://files.pythonhosted.org/packages/e3/a5/6ddab2b4c112be95601c13428db1d8b6608a8b6039816f2ba09c346c08fc/greenlet-3.2.4-cp314-cp314-win_amd64.whl", hash = "sha256:e37ab26028f12dbb0ff65f29a8d3d44a765c61e729647bf2ddfbbed621726f01", size = 303425, upload-time = "2025-08-07T13:32:27.59Z" },
 ]
 
@@ -558,6 +641,28 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/01/ee/02a2c011bdab74c6fb3c75474d40b3052059d95df7e73351460c8588d963/h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1", size = 101250, upload-time = "2025-04-24T03:35:25.427Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86", size = 37515, upload-time = "2025-04-24T03:35:24.344Z" },
+]
+
+[[package]]
+name = "h2"
+version = "4.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "hpack" },
+    { name = "hyperframe" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1d/17/afa56379f94ad0fe8defd37d6eb3f89a25404ffc71d4d848893d270325fc/h2-4.3.0.tar.gz", hash = "sha256:6c59efe4323fa18b47a632221a1888bd7fde6249819beda254aeca909f221bf1", size = 2152026, upload-time = "2025-08-23T18:12:19.778Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/69/b2/119f6e6dcbd96f9069ce9a2665e0146588dc9f88f29549711853645e736a/h2-4.3.0-py3-none-any.whl", hash = "sha256:c438f029a25f7945c69e0ccf0fb951dc3f73a5f6412981daee861431b70e2bdd", size = 61779, upload-time = "2025-08-23T18:12:17.779Z" },
+]
+
+[[package]]
+name = "hpack"
+version = "4.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/2c/48/71de9ed269fdae9c8057e5a4c0aa7402e8bb16f2c6e90b3aa53327b113f8/hpack-4.1.0.tar.gz", hash = "sha256:ec5eca154f7056aa06f196a557655c5b009b382873ac8d1e66e79e87535f1dca", size = 51276, upload-time = "2025-01-22T21:44:58.347Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/07/c6/80c95b1b2b94682a72cbdbfb85b81ae2daffa4291fbfa1b1464502ede10d/hpack-4.1.0-py3-none-any.whl", hash = "sha256:157ac792668d995c657d93111f46b4535ed114f0c9c8d672271bbec7eae1b496", size = 34357, upload-time = "2025-01-22T21:44:56.92Z" },
 ]
 
 [[package]]
@@ -588,6 +693,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad", size = 73517, upload-time = "2024-12-06T15:37:21.509Z" },
 ]
 
+[package.optional-dependencies]
+http2 = [
+    { name = "h2" },
+]
+
 [[package]]
 name = "httpx-sse"
 version = "0.4.1"
@@ -595,6 +705,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6e/fa/66bd985dd0b7c109a3bcb89272ee0bfb7e2b4d06309ad7b38ff866734b2a/httpx_sse-0.4.1.tar.gz", hash = "sha256:8f44d34414bc7b21bf3602713005c5df4917884f76072479b21f68befa4ea26e", size = 12998, upload-time = "2025-06-24T13:21:05.71Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/25/0a/6269e3473b09aed2dab8aa1a600c70f31f00ae1349bee30658f7e358a159/httpx_sse-0.4.1-py3-none-any.whl", hash = "sha256:cba42174344c3a5b06f255ce65b350880f962d99ead85e776f23c6618a377a37", size = 8054, upload-time = "2025-06-24T13:21:04.772Z" },
+]
+
+[[package]]
+name = "hyperframe"
+version = "6.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/02/e7/94f8232d4a74cc99514c13a9f995811485a6903d48e5d952771ef6322e30/hyperframe-6.1.0.tar.gz", hash = "sha256:f630908a00854a7adeabd6382b43923a4c4cd4b821fcb527e6ab9e15382a3b08", size = 26566, upload-time = "2025-01-22T21:41:49.302Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/30/47d0bf6072f7252e6521f3447ccfa40b421b6824517f82854703d0f5a98b/hyperframe-6.1.0-py3-none-any.whl", hash = "sha256:b03380493a519fce58ea5af42e4a42317bf9bd425596f7a0835ffce80f1a42e5", size = 13007, upload-time = "2025-01-22T21:41:47.295Z" },
 ]
 
 [[package]]
@@ -929,11 +1048,11 @@ wheels = [
 
 [[package]]
 name = "pygments"
-version = "2.19.2"
+version = "2.20.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887", size = 4968631, upload-time = "2025-06-21T13:39:12.283Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz", hash = "sha256:6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f", size = 4955991, upload-time = "2026-03-29T13:29:33.898Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b", size = 1225217, upload-time = "2025-06-21T13:39:07.939Z" },
+    { url = "https://files.pythonhosted.org/packages/f4/7e/a72dd26f3b0f4f2bf1dd8923c85f7ceb43172af56d63c7383eb62b332364/pygments-2.20.0-py3-none-any.whl", hash = "sha256:81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176", size = 1231151, upload-time = "2026-03-29T13:29:30.038Z" },
 ]
 
 [[package]]
