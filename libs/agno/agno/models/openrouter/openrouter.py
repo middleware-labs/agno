@@ -11,6 +11,12 @@ from agno.models.message import Message
 from agno.models.openai.like import OpenAILike
 from agno.models.response import ModelResponse
 from agno.run.agent import RunOutput
+from agno.utils.models.claude import supports_prefill
+
+# Model ids that name a router rather than a model: the upstream model is chosen by
+# OpenRouter per request, so the id says nothing about whether prefill is supported.
+_OPAQUE_ROUTED_IDS = frozenset({"openrouter/auto"})
+_OPAQUE_ROUTED_ID_PREFIXES = ("@preset/",)
 
 
 @dataclass
@@ -28,6 +34,9 @@ class OpenRouter(OpenAILike):
         fallback_models (Optional[List[str]]): List of fallback model IDs to use if the primary model
             fails due to rate limits, timeouts, or unavailability. OpenRouter will automatically try
             these models in order. Example: ["anthropic/claude-sonnet-4", "deepseek/deepseek-r1"]
+        append_trailing_user_message (Optional[bool]): Inherited from ``OpenAILike``. Defaults to
+            None, which auto-detects from every model that can serve the request, not just ``id``
+            (see ``__post_init__``).
     """
 
     id: str = "gpt-5.4-mini"
@@ -38,6 +47,29 @@ class OpenRouter(OpenAILike):
     base_url: str = "https://openrouter.ai/api/v1"
     max_tokens: int = 1024
     models: Optional[List[str]] = None  # Dynamic model routing https://openrouter.ai/docs/features/model-routing
+
+    def __post_init__(self):
+        # Read the flag before OpenAILike resolves None into a concrete bool, so an
+        # explicit caller value still wins over the router-aware default below.
+        prefill_guard_unset = self.append_trailing_user_message is None
+
+        super().__post_init__()
+
+        # OpenAILike auto-detects the prefill guard from `id` alone. On OpenRouter the id
+        # is often not the model that answers: the Auto Router and presets resolve upstream,
+        # and `models` adds fallbacks. So the inherited check clears the guard while the
+        # request can still land on Claude 4.6+, which rejects a trailing assistant message
+        # with a 400.
+        if prefill_guard_unset and self._may_route_to_prefill_unsupported_model():
+            self.append_trailing_user_message = True
+
+    def _may_route_to_prefill_unsupported_model(self) -> bool:
+        """Whether OpenRouter may serve this request from a model that rejects assistant prefill."""
+        if self.id in _OPAQUE_ROUTED_IDS or self.id.startswith(_OPAQUE_ROUTED_ID_PREFIXES):
+            # The upstream model is unknowable here, so assume the stricter contract.
+            return True
+
+        return any(not supports_prefill(model_id) for model_id in self.models or [])
 
     def _get_client_params(self) -> Dict[str, Any]:
         """
