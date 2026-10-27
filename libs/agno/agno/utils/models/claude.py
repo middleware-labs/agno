@@ -669,9 +669,9 @@ def format_messages(
                         content.append(
                             ToolUseBlock(
                                 id=tool_call["id"],
-                                input=json.loads(tool_call["function"]["arguments"])
-                                if "arguments" in tool_call["function"]
-                                else {},
+                                # OpenAI-compatible streams store a no-argument call as "" (Claude-routed
+                                # gateways emit only empty argument deltas), which json.loads rejects.
+                                input=json.loads(tool_call["function"].get("arguments") or "{}"),
                                 name=tool_call["function"]["name"],
                                 type="tool_use",
                             )
